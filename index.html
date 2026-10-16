@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>DJ Analyzer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=6">
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="#home" data-view="home">🎧 DJ <b>ANALYZER</b></a>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Rechercher un titre, un artiste…" autocomplete="off">
+    </div>
+    <nav>
+      <button data-view="home">Accueil</button>
+      <button data-view="analyze">Analyser</button>
+      <button data-view="library">Bibliothèque</button>
+      <button data-view="mashup">Mashup</button>
+      <button data-view="sets">Sets</button>
+    </nav>
+    <div id="auth-area"></div>
+  </div>
+</header>
+
+<main>
+  <!-- Accueil -->
+  <section id="v-home">
+    <div class="hero">
+      <h1>Le BPM et la tonalité<br>de <span class="grad">n'importe quel morceau</span></h1>
+      <p>Cherche un titre, analyse tes fichiers, trouve les morceaux qui se mixent ensemble.</p>
+      <div class="features">
+        <button class="feature" data-go="search"><span class="f-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><b>Rechercher</b><small>BPM, tonalité et Camelot de millions de titres</small></button>
+        <button class="feature" data-go="analyze"><span class="f-ico">⬆</span><b>Analyser mes fichiers</b><small>MP3, WAV, FLAC, AIFF… analysés en entier</small></button>
+        <button class="feature" data-go="mashup"><span class="f-ico">⨯</span><b>Mashup finder</b><small>Les morceaux qui se superposent au tien</small></button>
+      </div>
+    </div>
+    <div class="section-head">
+      <h2 class="h2">Top du moment</h2>
+      <span class="status" id="chart-status"></span>
+    </div>
+    <div class="chips scroll" id="genre-chips"></div>
+    <div class="tracks ranked" id="chart-list"></div>
+  </section>
+
+  <!-- Recherche -->
+  <section id="v-search" class="hidden">
+    <h1 class="title" id="search-title">Recherche</h1>
+    <p class="status" id="search-status"></p>
+    <div id="local-block" class="hidden">
+      <h2 class="sub">Dans ta bibliothèque</h2>
+      <div class="tracks" id="local-list"></div>
+    </div>
+    <div id="online-block" class="hidden">
+      <h2 class="sub">Catalogue</h2>
+      <div class="tracks" id="online-list"></div>
+    </div>
+  </section>
+
+  <!-- Analyse -->
+  <section id="v-analyze" class="hidden">
+    <h1 class="title">Analyser mes fichiers</h1>
+    <p class="status">BPM, tonalité, Camelot et énergie calculés sur le morceau entier. L'audio n'est jamais conservé.</p>
+    <div id="analyze-gate" class="hidden"></div>
+    <div id="drop">
+      <div style="font-size:28px">⬆</div>
+      <div class="big">Glisse tes morceaux ici</div>
+      <div class="muted">ou clique pour choisir · MP3, WAV, FLAC, AIFF, M4A, OGG · 100 Mo max</div>
+    </div>
+    <input id="file" type="file" accept="audio/*,.aif,.aiff,.flac" multiple hidden>
+    <div class="tracks" style="margin-top:20px" id="analyze-list"></div>
+  </section>
+
+  <!-- Bibliothèque -->
+  <section id="v-library" class="hidden">
+    <h1 class="title">Ma bibliothèque</h1>
+    <div id="lib-gate" class="hidden"></div>
+    <div id="lib-body" class="lib-layout">
+      <aside class="wheel-box">
+        <div id="wheel"></div>
+        <p class="status" id="wheel-status">Clique une tonalité pour voir les morceaux compatibles.</p>
+      </aside>
+      <div style="min-width:0">
+        <p class="status" id="lib-status"></p>
+        <div class="chips" id="sorts">
+          <button class="chip on" data-sort="recent">Récents</button>
+          <button class="chip" data-sort="bpm">BPM</button>
+          <button class="chip" data-sort="key">Camelot</button>
+          <button class="chip" data-sort="energy">Énergie</button>
+          <button class="chip" data-sort="title">A → Z</button>
+        </div>
+        <div class="tracks" id="lib-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sets -->
+  <section id="v-sets" class="hidden">
+    <h1 class="title">Mes sets</h1>
+    <p class="status">Construis tes sets, laisse le site proposer l'ordre qui enchaîne le mieux, exporte vers Rekordbox.</p>
+    <div id="sets-gate" class="hidden"></div>
+    <div id="sets-body" class="sets-layout">
+      <aside class="panel sets-list">
+        <button class="btn primary" id="new-set" style="width:100%">+ Nouveau set</button>
+        <div id="sets-list"></div>
+      </aside>
+      <div id="set-detail" style="min-width:0"></div>
+    </div>
+  </section>
+
+  <!-- Mashup finder -->
+  <section id="v-mashup" class="hidden">
+    <h1 class="title">Mashup finder</h1>
+    <p class="status">Choisis un morceau : on te propose ceux qui se superposent bien (tonalités compatibles, tempos proches).</p>
+    <div id="seed-picker" class="panel">
+      <div class="search wide">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="seed-q" type="search" placeholder="Cherche le morceau de départ…" autocomplete="off">
+      </div>
+      <p class="status" id="seed-status"></p>
+      <div class="tracks compact" id="seed-results"></div>
+    </div>
+    <div id="seed-box" class="hidden"></div>
+    <div id="mashup-controls" class="hidden">
+      <div class="controls">
+        <div><small class="lbl">Écart de tempo</small>
+          <div class="chips" id="tol-chips">
+            <button class="chip" data-tol="3">±3 %</button>
+            <button class="chip on" data-tol="6">±6 %</button>
+            <button class="chip" data-tol="10">±10 %</button>
+          </div></div>
+        <div><small class="lbl">Mi / double tempo</small>
+          <div class="chips" id="hd-chips">
+            <button class="chip on" data-hd="1">Oui</button>
+            <button class="chip" data-hd="0">Non</button>
+          </div></div>
+        <div><small class="lbl">Chercher dans</small>
+          <div class="chips" id="scope-chips">
+            <button class="chip on" data-scope="all">Tout le site</button>
+            <button class="chip" data-scope="library">Ma bibliothèque</button>
+          </div></div>
+      </div>
+      <p class="status" id="mashup-status"></p>
+      <div class="tracks" id="mashup-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Données : <a href="https://getsongbpm.com" target="_blank" rel="noopener">GetSongBPM</a> ·
+  <a href="https://www.deezer.com" target="_blank" rel="noopener">Deezer</a> ·
+  <a href="https://music.apple.com" target="_blank" rel="noopener">Apple Music</a>
+</footer>
+
+<div id="scrim" class="hidden"></div>
+<aside id="drawer" aria-hidden="true"></aside>
+<div id="toast" class="hidden" role="status"></div>
+<div id="modal-wrap" class="hidden"><div id="modal" role="dialog" aria-modal="true"></div></div>
+
+<div id="player" class="hidden">
+  <div class="art" id="p-art"></div>
+  <div class="p-info"><div class="t-name" id="p-title"></div><div class="t-artist" id="p-artist"></div></div>
+  <button class="p-ctrl" id="p-toggle" aria-label="Lecture / pause"></button>
+  <div class="p-progress"><span id="p-cur">0:00</span><div class="p-track" id="p-bar"><div class="p-fill" id="p-fill"></div></div><span id="p-dur">0:30</span></div>
+  <button class="p-close" id="p-close" aria-label="Fermer le lecteur">×</button>
+</div>
+<audio id="audio" preload="none"></audio>
+<audio id="audio2" preload="none"></audio>
+
+<script src="/static/app.js?v=6"></script>
+</body>
+</html>
