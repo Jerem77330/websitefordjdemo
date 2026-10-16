@@ -4,13 +4,18 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - GETSONGBPM_API_KEY=${GETSONGBPM_API_KEY:-}
-      - WATCHFILES_FORCE_POLLING=true   # nécessaire pour détecter les changements sous Windows
+      - GETSONGBPM_API_KEY=${GETSONGBPM_API_KEY:-}   # lue depuis le fichier .env
+      - ANALYSIS_WORKERS=${ANALYSIS_WORKERS:-2}
+      - SITE_URL=${SITE_URL:-}
+      - COOKIE_SECURE=${COOKIE_SECURE:-0}
     volumes:
       - ./app:/srv/app
       - ./static:/srv/static
       - dj-data:/srv/data
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Redémarre tout seul en cas de plantage. Après une mise à jour des fichiers :
+    #   docker compose restart
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 volumes:
   dj-data:
